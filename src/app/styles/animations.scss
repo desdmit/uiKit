@@ -1,0 +1,34 @@
+%slideFromTop {
+  animation: slideFromTop 0.3s ease-in-out;
+}
+
+%fadeIn {
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+%fadeInHover {
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+@keyframes slideFromTop {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,16 @@
+@import '../../material-theme';
+
+// colors variables
+$foreground: map-get($app-theme, foreground);
+$background: map-get($app-theme, background);
+
+$text: map_get($foreground, text);
+$secondary-text: map_get($foreground, secondary-text);
+$disabled: map_get($foreground, disabled);
+$divider: map_get($foreground, divider);
+
+$focused: map_get($background, focused-button);
+$app-bar: map_get($background, app-bar);
+$disabled-list: map_get($background, disabled-list-option);
+
+$warn-default: map_get($app-warn, default);

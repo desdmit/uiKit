@@ -1,5 +1,12 @@
 /* Add application styles & imports to this file! */
-@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
-@import "primeicons/primeicons.css";
-@import "primeng/resources/themes/nova-light/theme.css";
-@import "primeng/resources/primeng.min.css";
+/* @import '@angular/material/prebuilt-themes/deeppurple-amber.css';*/
+
+/*@import '~office-ui-fabric-core/src/sass/Fabric.css';*/
+
+@import url('references/fonts/fabric/fabric.css');
+
+body,
+html {
+  height: 100%;
+  margin: 0;
+}

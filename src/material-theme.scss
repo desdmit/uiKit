@@ -2,20 +2,21 @@
 // Plus imports for other components in your app.
 
 $custom-typography: mat-typography-config(
-$font-family: 'Segoe UI Regular WestEuropean, Segoe UI Regular, Segoe UI, Tahoma, Arial, sans-serif',
-$display-4: mat-typography-level(112px, 112px, 300),
-$display-3: mat-typography-level(56px, 56px, 400),
-$display-2: mat-typography-level(45px, 48px, 400),
-$display-1: mat-typography-level(34px, 40px, 400),
-$headline: mat-typography-level(24px, 32px, 400),
-$title: mat-typography-level(20px, 32px, 500),
-$subheading-2: mat-typography-level(13px, 18px, 400),
-$subheading-1: mat-typography-level(15px, 24px, 400),
-$body-2: mat-typography-level(14px, 24px, 500),
-$body-1: mat-typography-level(14px, 20px, 400),
-$caption: mat-typography-level(12px, 20px, 400),
-$button: mat-typography-level(14px, 14px, 500),
-$input: mat-typography-level(inherit, 1.125, 400),
+  $font-family:
+    'Segoe UI Regular WestEuropean, Segoe UI Regular, Segoe UI, Tahoma, Arial, sans-serif',
+  $display-4: mat-typography-level(112px, 112px, 300),
+  $display-3: mat-typography-level(56px, 56px, 400),
+  $display-2: mat-typography-level(45px, 48px, 400),
+  $display-1: mat-typography-level(34px, 40px, 400),
+  $headline: mat-typography-level(24px, 32px, 400),
+  $title: mat-typography-level(20px, 32px, 500),
+  $subheading-2: mat-typography-level(13px, 18px, 400),
+  $subheading-1: mat-typography-level(15px, 24px, 400),
+  $body-2: mat-typography-level(13px, 24px, 500),
+  $body-1: mat-typography-level(13px, 20px, 400),
+  $caption: mat-typography-level(12px, 20px, 400),
+  $button: mat-typography-level(13px, 14px, 500),
+  $input: mat-typography-level(inherit, 1.125, 400),
 );
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -26,19 +27,54 @@ $input: mat-typography-level(inherit, 1.125, 400),
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://www.google.com/design/spec/style/color.html
-$candy-app-primary: mat-palette($mat-blue, 700, 900, 300);
-$candy-app-accent: mat-palette($mat-pink, A200, A100, A400);
+$app-primary: mat-palette($mat-blue, 700, 900, 300);
+$app-accent: mat-palette($mat-pink, A200, A100, A400);
 
 // The warn palette is optional (defaults to red).
-$candy-app-warn: mat-palette($mat-red);
+$app-warn: mat-palette($mat-red);
+
+/*$mat-light-theme-foreground: (
+  base: black,
+  divider: $dark-dividers,
+  dividers: $dark-dividers,
+  disabled: $dark-disabled-text,
+  disabled-button: rgba(black, 0.26),
+  disabled-text: $dark-disabled-text,
+  elevation: black,
+  hint-text: $dark-disabled-text,
+  secondary-text: $dark-secondary-text,
+  icon: rgba(black, 0.54),
+  icons: rgba(black, 0.54),
+  text: rgba(black, 0.87),
+  slider-min: rgba(black, 0.87),
+  slider-off: rgba(black, 0.26),
+  slider-off-active: rgba(black, 0.38),
+);*/
+
+/*$mat-light-theme-background: (
+  status-bar: map_get($mat-grey, 300),
+  app-bar: map_get($mat-grey, 100),
+  background: map_get($mat-grey, 50),
+  hover: rgba(black, 0.04),
+  // TODO(kara): check style with Material Design UX card: white,
+  dialog: white,
+  disabled-button: rgba(black, 0.12),
+  raised-button: white,
+  focused-button: $dark-focused,
+  selected-button: map_get($mat-grey, 300),
+  selected-disabled-button: map_get($mat-grey, 400),
+  disabled-button-toggle: map_get($mat-grey, 200),
+  unselected-chip: map_get($mat-grey, 300),
+  disabled-list-option: map_get($mat-grey, 200),
+);*/
 
 // Create the theme object (a Sass map containing all of the palettes).
-$candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
+$app-theme: mat-light-theme($app-primary, $app-accent, $app-warn);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include angular-material-theme($candy-app-theme);
+@include angular-material-theme($app-theme);
 
 .oc-theme {
   // todo cleand outer styles interferences. remove after old styles will be deleted
