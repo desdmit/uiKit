@@ -1,4 +1,4 @@
-<cdk-virtual-scroll-viewport coreTableVirtualScroll [rowHeight]="rowHeight">
+<cdk-virtual-scroll-viewport coreTableVirtualScroll [rowHeight]="rowHeight" class="viewport">
   <mat-table matSort [dataSource]="dataSource" [trackBy]="id" class="table">
     <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
@@ -18,14 +18,6 @@
         </mat-checkbox>
       </mat-cell>
     </ng-container>
-    <ng-container matColumnDef="id" sticky>
-      <mat-header-cell *matHeaderCellDef class="id">
-        <core-table-filter (change)="filter('id', $event)">
-          <div mat-sort-header>ID</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="id">{{ row.id }}</mat-cell>
-    </ng-container>
     <ng-container matColumnDef="type">
       <mat-header-cell *matHeaderCellDef class="type">
         <core-table-filter (change)="filter('id', $event)">
@@ -37,7 +29,7 @@
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="narrow">
-      <mat-header-cell *matHeaderCellDef class="narrow">
+      <mat-header-cell *matHeaderCellDef class="narrow header-cell">
         <core-table-filter (change)="filter('name', $event)">
           <div mat-sort-header></div>
         </core-table-filter>
@@ -61,7 +53,7 @@
             <div class="state-info">
               {{ row.menu.state }}<mat-icon class="state-icon" [inline]="true">menu</mat-icon>
             </div>
-            <div class="meta">{{ row.changeDate | date: 'MM/dd/yyyy, hh:mm a' }}</div>
+            <div class="meta">{{ row.changeDate | date: dateFormat }}</div>
           </div>
         </div>
       </mat-cell>
@@ -132,14 +124,18 @@
           <div mat-sort-header>Updated At</div>
         </core-table-filter>
       </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="changeDate">{{
-        row.changeDate | date: 'MM/dd/yyyy, hh:mm a'
-      }}</mat-cell>
+      <mat-cell *matCellDef="let row" class="changeDate">
+        <span>{{ row.changeDate | date: dateFormat }}</span>
+      </mat-cell>
     </ng-container>
-    <ng-container matColumnDef="actions">
-      <mat-header-cell *matHeaderCellDef class="actions">
+    <ng-container matColumnDef="menu" stickyEnd>
+      <mat-header-cell *matHeaderCellDef class="menu">
         <core-table-menu (clear)="clearFilters()"></core-table-menu>
       </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="menu cell"></mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="actions" stickyEnd>
+      <mat-header-cell *matHeaderCellDef class="actions"> </mat-header-cell>
       <mat-cell *matCellDef="let row" class="actions cell">
         <div class="actions-items">
           <mat-icon fontSet="fabric" fontIcon="ms-Icon--Download" [inline]="true"></mat-icon>
@@ -148,17 +144,14 @@
         </div>
       </mat-cell>
     </ng-container>
-    <!--<ng-container matColumnDef="menu" stickyEnd>
-      <mat-header-cell *matHeaderCellDef class="menu">
 
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="menu"></mat-cell>
-    </ng-container>-->
     <ng-container matColumnDef="progress">
       <mat-header-cell *matHeaderCellDef [attr.colspan]="columns.length">
-        <mat-progress-bar mode="indeterminate" [class.show]="pending"> </mat-progress-bar>
+        <mat-progress-bar mode="indeterminate" *ngIf="pending" class="progress-bar">
+        </mat-progress-bar>
       </mat-header-cell>
     </ng-container>
+
     <mat-header-row
       *matHeaderRowDef="columns; sticky: sticky"
       [style.top.px]="offset"
@@ -171,6 +164,7 @@
       [style.top.px]="offset + 56"
     >
     </mat-header-row>
+
     <mat-row *matRowDef="let row; columns: columns" class="row"></mat-row>
   </mat-table>
 </cdk-virtual-scroll-viewport>

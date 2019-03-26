@@ -8,48 +8,40 @@ import {
   ViewChildren,
   QueryList,
 } from '@angular/core';
-import { of, Subject, Observable } from 'rxjs';
-import { delay, exhaustMap, filter, map, tap } from 'rxjs/operators';
+import { Subject, Observable } from 'rxjs';
+import { exhaustMap, filter, map, tap, distinctUntilChanged } from 'rxjs/operators';
 import { MatPaginator, MatSort } from '@angular/material';
-import { CoreTableMenuComponent } from '../core-table/menu/menu.component';
-import { CoreTableFilterComponent } from '../core-table/filter/filter.component';
-import { CoreTableDataSource } from '../core-table/data-source';
+import { CoreTableMenuComponent } from '../menu/menu.component';
+import { CoreTableFilterComponent } from '../filter/filter.component';
+import { CoreTableDataSource } from '../data-source';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { IDocument } from '../inventory/docoments';
-import { size } from '../utilities/window';
+import { IDocument } from '../../inventory/docoments';
+import { WindowUtilities } from '../../utilities';
 
 @Component({
-  selector: 'my-example-table',
-  templateUrl: './example-table.component.html',
-  styleUrls: ['./example-table.component.scss'],
+  selector: 'core-table',
+  templateUrl: './core-table.component.html',
+  styleUrls: ['./core-table.component.scss'],
 })
-export class ExampleTableComponent implements AfterViewInit, OnInit {
+export class CoreTableComponent implements AfterViewInit, OnInit {
   @Input() public getData: (page: number, count: number) => Observable<IDocument[]>;
   @Input() public pageSize = 50;
-
-  /*@Input()
-  set items(data: Example[]) {
-    this.init();
-    this.dataSource.allData = data;
-    this.data = data;
-  }
-
-  private data: Example[];*/
-
   @Input() public sticky: boolean;
-  public pending: boolean;
   @Output() public select = new Subject<IDocument[]>();
+
   @ViewChild(MatSort) public sort: MatSort;
   @ViewChild(MatPaginator) public paginator: MatPaginator;
   @ViewChild(CdkVirtualScrollViewport) public viewport: CdkVirtualScrollViewport;
   @ViewChild(CoreTableMenuComponent) public tableMenu: CoreTableMenuComponent;
   @ViewChildren(CoreTableFilterComponent) public filters: QueryList<CoreTableFilterComponent>;
 
+  public dateFormat = 'MM/dd/yyyy, hh:mm a';
+  public pending: boolean;
   public offset: number;
-  public rowHeight = 27;
+  public rowHeight: number;
   public dataSource: CoreTableDataSource<IDocument>;
   public columns: string[] = [
-    'id',
+    // 'select',
     'type',
     'narrow',
     'name',
@@ -61,7 +53,7 @@ export class ExampleTableComponent implements AfterViewInit, OnInit {
     'changedBy',
     'changeDate',
     'actions',
-    // 'menu',
+    'menu',
   ];
 
   get indeterminate(): boolean {
@@ -76,32 +68,22 @@ export class ExampleTableComponent implements AfterViewInit, OnInit {
     return this.dataSource.selectedAll;
   }
 
+  public constructor(windowUtils: WindowUtilities) {
+    windowUtils.size
+      .pipe(
+        map(({ isNarrow }) => isNarrow),
+        distinctUntilChanged(),
+      )
+      .subscribe(isNarrow => {
+        this.rowHeight = isNarrow ? 70 : 27;
+      });
+  }
+
   public ngOnInit() {
-    this.init();
-
-    size.subscribe(({ isNarrow }) => {
-      this.rowHeight = isNarrow ? 70 : 27;
-      console.log(this.rowHeight);
+    this.viewport.scrolledIndexChange.subscribe(() => {
+      this.offset = -this.viewport.getOffsetToRenderedContentStart();
     });
-  }
 
-  public ngAfterViewInit() {
-    if (this.filters.length && this.tableMenu == undefined) {
-      // this just hides the table data by introducing a bogus filter.
-      // not having a clear filters button hopefully makes the error obvious.
-      this.dataSource.setFilter({ key: '', predicate: () => undefined, valueFn: () => undefined });
-      // this notifies the error to the dev
-      throw new Error(
-        `<core-table-filter> usage requires a <core-table-menu> for user convenience`,
-      );
-    }
-  }
-
-  private hasObservers(subject: Subject<any>): boolean {
-    return subject.observers.length > 0;
-  }
-
-  private init() {
     if (this.dataSource) {
       return;
     }
@@ -118,15 +100,11 @@ export class ExampleTableComponent implements AfterViewInit, OnInit {
 
     this.dataSource.selectionChanged.subscribe(() => this.select.next(this.dataSource.selected));
 
-    this.viewport.scrolledIndexChange.subscribe(() => {
-      this.offset = -this.viewport.getOffsetToRenderedContentStart();
-    });
-
     this.getData(0, this.pageSize).subscribe(data => {
       this.dataSource.allData = data;
     });
 
-    const buffer = 20;
+    const buffer = 5;
     this.viewport.renderedRangeStream
       .pipe(
         map(({ end }) => {
@@ -134,16 +112,32 @@ export class ExampleTableComponent implements AfterViewInit, OnInit {
         }),
         filter(({ end, data }) => end + buffer > data.length),
         tap(() => (this.pending = true)),
-        exhaustMap(({ data }) =>
-          this.getData(data.length / this.pageSize, this.pageSize).pipe(
+        exhaustMap(({ data }) => {
+          return this.getData(data.length / this.pageSize, this.pageSize).pipe(
             map(value => [...data, ...value]),
-          ),
-        ),
+          );
+        }),
       )
       .subscribe(data => {
         this.dataSource.allData = data;
         this.pending = false;
       });
+  }
+
+  public ngAfterViewInit() {
+    if (this.filters.length && !this.tableMenu) {
+      // this just hides the table data by introducing a bogus filter.
+      // not having a clear filters button hopefully makes the error obvious.
+      this.dataSource.setFilter({ key: '', predicate: () => undefined, valueFn: () => undefined });
+      // this notifies the error
+      throw new Error(
+        `<core-table-filter> usage requires a <core-table-menu> for user convenience`,
+      );
+    }
+  }
+
+  private hasObservers(subject: Subject<any>): boolean {
+    return subject.observers.length > 0;
   }
 
   public clearFilters(): void {

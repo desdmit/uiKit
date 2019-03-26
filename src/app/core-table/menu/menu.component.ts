@@ -8,5 +8,5 @@ import { Subject } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CoreTableMenuComponent {
-  @Output() clear = new Subject<void>();
+  @Output() public clear = new Subject<void>();
 }

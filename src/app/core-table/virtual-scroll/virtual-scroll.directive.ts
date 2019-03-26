@@ -7,10 +7,11 @@ import {
   Input,
   OnChanges,
   OnDestroy,
+  SimpleChanges,
 } from '@angular/core';
 import { MatTable } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { CoreTableDataSource } from '../data-source';
+import { CoreTableDataSource } from '../data-source/data-source';
 import { CoreTableVirtualScrollStrategy } from './virtual-scroll.strategy';
 
 @Directive({

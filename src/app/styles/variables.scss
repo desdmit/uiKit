@@ -1,4 +1,8 @@
-@import '../../material-theme';
+@import 'material-theme';
+
+// media queries
+$xs: '(max-width: 600px)';
+$gt-xs: '(min-width: 601px)';
 
 // colors variables
 $foreground: map-get($app-theme, foreground);

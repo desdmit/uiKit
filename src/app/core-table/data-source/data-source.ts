@@ -1,16 +1,17 @@
-import {
-  DataSource,
-  ListRange,
-  SelectionChange,
-  SelectionModel,
-} from '@angular/cdk/collections';
+import { DataSource, SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { MatPaginator, MatSort, Sort } from '@angular/material';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, shareReplay, startWith, tap } from 'rxjs/operators';
-import { CoreTableFilter } from './filter/filter';
-import { HashMap } from './hash-map';
-import { sortBy } from './sort-by';
+import { CoreTableFilter } from '../filter/filter';
+import { HashMap } from '../../utilities/index';
+import { sortBy } from '../../utilities/reactive';
+
+interface IDataSourceInit {
+  sort?: MatSort;
+  paginator?: MatPaginator;
+  viewport?: CdkVirtualScrollViewport;
+}
 
 /**
  * `DataSource` to be used with `CoreTable` and `MatTable`.
@@ -18,27 +19,26 @@ import { sortBy } from './sort-by';
  * Supports advanced filtering, sorting, pagination and virtual scroll.
  */
 export class CoreTableDataSource<T> extends DataSource<T> {
+  private readonly filteredDataInfo = new BehaviorSubject<T[]>([]);
+  private filterMap: HashMap<CoreTableFilter<T>> = {};
+  private readonly selection = new SelectionModel<T>(true, []);
+  private readonly visibleData: Observable<T[]>;
+  private allDataInfo: T[];
+
   /**
    * A stream of the filtered arrays of data
    */
   public readonly filteredData: Observable<T[]>;
 
-  private readonly _filteredData = new BehaviorSubject<T[]>([]);
-  private filterMap: HashMap<CoreTableFilter<T>> = {};
-  private readonly selection = new SelectionModel<T>(true, []);
-  private readonly visibleData: Observable<T[]>;
-  private _data: T[];
-
   /**
    * The full array of data
    */
   get allData(): T[] {
-    return this._data.slice();
+    return this.allDataInfo.slice();
   }
   set allData(data: T[]) {
-    this._data = data;
+    this.allDataInfo = data;
     this.filter(data, this.filterMap);
-    this.selection.clear();
   }
 
   /**
@@ -69,9 +69,7 @@ export class CoreTableDataSource<T> extends DataSource<T> {
    * Whether all visible items are selected.
    */
   get selectedAll(): boolean {
-    return (
-      this.selection.hasValue() && this.selected.length === this.data.length
-    );
+    return this.selection.hasValue() && this.selected.length === this.allDataInfo.length;
   }
 
   /**
@@ -81,69 +79,42 @@ export class CoreTableDataSource<T> extends DataSource<T> {
     return this.selection.changed;
   }
 
-  constructor(
-    initialData: T[],
-    {
-      sort,
-      paginator,
-      viewport,
-    }: {
-      sort?: MatSort;
-      paginator?: MatPaginator;
-      viewport?: CdkVirtualScrollViewport;
-    } = {},
-  ) {
+  constructor(initialData: T[], { sort, paginator, viewport }: IDataSourceInit = {}) {
     super();
-    this._data = initialData;
-    this.filteredData = this._filteredData.asObservable();
-    this._filteredData.next(initialData);
+    this.allDataInfo = initialData;
+    this.filteredData = this.filteredDataInfo.asObservable();
+    this.filteredDataInfo.next(initialData);
 
-    const ordered =
-      sort == undefined
-        ? this._filteredData
-        : combineLatest(
-            this._filteredData,
-            sort.sortChange.pipe(startWith({} as Sort)),
-          ).pipe(
-            map(([data, { active, direction }]) =>
-              !active || !direction
-                ? data
-                : sortBy<T>(t => getProperty(t, active), {
-                    reverse: direction === 'desc',
-                  })(data),
-            ),
-          );
+    const ordered = !sort
+      ? this.filteredDataInfo
+      : combineLatest(this.filteredDataInfo, sort.sortChange.pipe(startWith({}))).pipe(
+          map<[T[], Sort], T[]>(([data, { active, direction }]) =>
+            !active || !direction
+              ? data
+              : sortBy<T>(t => getProperty(t, active), {
+                  reverse: direction === 'desc',
+                })(data),
+          ),
+        );
 
-    const paged =
-      paginator == undefined
-        ? ordered
-        : combineLatest(
-            ordered,
-            paginator.page.pipe(startWith(undefined)),
-          ).pipe(
-            map(([data]) => data),
-            tap(data => {
-              paginator.length = data.length;
-            }),
-            map(data => {
-              const start = paginator.pageIndex * paginator.pageSize;
-              return data.slice(start, start + paginator.pageSize);
-            }),
-          );
+    const paged = !paginator
+      ? ordered
+      : combineLatest(ordered, paginator.page).pipe(
+          map(([data]) => data),
+          tap(data => {
+            paginator.length = data.length;
+          }),
+          map(data => {
+            const start = paginator.pageIndex * paginator.pageSize;
+            return data.slice(start, start + paginator.pageSize);
+          }),
+        );
 
-    const sliced =
-      viewport == undefined
-        ? paged
-        : combineLatest(
-            paged,
-            viewport.renderedRangeStream.pipe(startWith({} as ListRange)),
-          ).pipe(
-            map(([data, { start, end }]) =>
-              start == undefined || end == undefined
-                ? data
-                : data.slice(start, end),
-            ),
-          );
+    const sliced = !viewport
+      ? paged
+      : combineLatest(paged, viewport.renderedRangeStream).pipe(
+          map(([data, { start, end }]) => data.slice(start, end)),
+        );
 
     this.visibleData = sliced.pipe(shareReplay(1));
   }
@@ -153,7 +124,7 @@ export class CoreTableDataSource<T> extends DataSource<T> {
    */
   public clearFilters(): void {
     this.filterMap = {};
-    this._filteredData.next(this.allData);
+    this.filteredDataInfo.next(this.allData);
   }
 
   /**
@@ -215,7 +186,7 @@ export class CoreTableDataSource<T> extends DataSource<T> {
     this.filterMap[key] = newFilter;
 
     newKey
-      ? this.filter(this._filteredData.value, { [key]: newFilter })
+      ? this.filter(this.filteredDataInfo.value, { [key]: newFilter })
       : this.filter(this.allData, this.filterMap);
   }
 
@@ -234,28 +205,24 @@ export class CoreTableDataSource<T> extends DataSource<T> {
    * If some or none are selected, selects all.
    */
   public toggleAll(): void {
-    this.selectedAll
-      ? this.selection.clear()
-      : this.selection.select(...this.data);
+    this.selectedAll ? this.selection.clear() : this.selection.select(...this.allDataInfo);
   }
 
   public connect() {
     return this.visibleData;
   }
 
-  public disconnect() {}
+  public disconnect() {
+    // add some unsubscribe actions here if required in the future
+  }
 
   private filter(data: T[], filters: HashMap<CoreTableFilter<T>>): void {
-    this._filteredData.next(
-      (data || []).filter((t: T) => filterOne(t, filters)),
-    );
+    this.filteredDataInfo.next((data || []).filter((t: T) => filterOne(t, filters)));
   }
 }
 
 function filterOne<T>(item: T, filters: HashMap<CoreTableFilter<T>>) {
-  return Object.values(filters).every(({ predicate, valueFn }) =>
-    predicate(valueFn(item)),
-  );
+  return Object.values(filters).every(({ predicate, valueFn }) => predicate(valueFn(item)));
 }
 
 function getProperty<T>(item: T, propertyPath: string): string {

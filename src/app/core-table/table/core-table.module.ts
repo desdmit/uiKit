@@ -9,12 +9,12 @@ import {
   MatIconRegistry,
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
-import { CoreTableFilterModule } from '../core-table/filter/filter.module';
-import { CoreTableMenuModule } from '../core-table/menu/menu.module';
-import { CoreTableVirtualScrollModule } from '../core-table/virtual-scroll/virtual-scroll.module';
-import { ExampleTableComponent } from './example-table.component';
+import { CoreTableFilterModule } from '../filter/filter.module';
+import { CoreTableMenuModule } from '../menu/menu.module';
+import { CoreTableVirtualScrollModule } from '../virtual-scroll/virtual-scroll.module';
+import { CoreTableComponent } from './core-table.component';
 
-const components = [ExampleTableComponent];
+const components = [CoreTableComponent];
 
 @NgModule({
   declarations: components,
@@ -32,8 +32,8 @@ const components = [ExampleTableComponent];
     MatIconModule,
   ],
 })
-export class ExampleTableModule {
-  constructor(iconRegistry: MatIconRegistry) {
+export class CoreTableModule {
+  /*constructor(iconRegistry: MatIconRegistry) {
     iconRegistry.registerFontClassAlias('fabric', 'ms-Icon-268');
-  }
+  }*/
 }

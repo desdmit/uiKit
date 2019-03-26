@@ -1,77 +1,77 @@
-@import '../styles/index';
-
-@mixin hide($queries...) {
-  @each $query in $queries {
-    @media #{$query} {
-      display: none !important;
-    }
-  }
-}
-
-%flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-// media queries
-$xs: '(max-width: 600px)';
-$gt-xs: '(min-width: 601px)';
+@import '../../styles/index';
 
 :host {
   display: block;
   height: 100%;
 }
 
-cdk-virtual-scroll-viewport {
+.viewport {
   height: 100%;
 }
 
-.mat-table {
+.table {
   width: 100%;
+}
+
+.row {
+  min-height: 27px;
+  height: 70px;
+  cursor: pointer;
+
+  @media #{$gt-xs} {
+    height: 27px;
+  }
+
+  &:hover {
+    background-color: $app-bar;
+  }
+}
+
+.header {
+  white-space: nowrap;
+
+  & > * {
+    color: $text;
+    font-weight: 600;
+  }
 }
 
 .mat-header-cell,
 .mat-cell {
-  &:not(:last-of-type) {
-    padding-right: 16px;
-  }
+  padding-right: 16px;
 
-  &:last-of-type {
-    padding-right: 5px;
+  &:first-of-type {
+    padding-left: 10px;
   }
 }
 
-.mat-header-row.progress {
+.progress {
   border: none;
-  // height: 0;
   min-height: 0;
 
   .mat-header-cell {
     border: 0;
     padding: 0;
   }
+}
 
-  mat-progress-bar {
-    bottom: 0;
-    position: absolute;
-    transition: height 0.3s, opacity 0.25s linear;
-
-    &:not(.show) {
-      height: 0;
-      opacity: 0;
-    }
-  }
+.progress-bar {
+  bottom: 0;
+  position: absolute;
+  @extend %fadeIn;
 }
 
 .menu {
-  max-width: 24px;
-}
+  width: 40px;
+  max-width: 40px;
+  flex: 1 0 auto;
+  margin-right: -40px;
+  padding-right: 0;
 
-// this compensates for flex display, i.e. not using <table>
-.id {
-  display: none;
-  max-width: 4rem;
+  &.cell {
+    z-index: -1 !important;
+    background: transparent;
+  }
 }
 
 .type {
@@ -95,10 +95,6 @@ cdk-virtual-scroll-viewport {
 }
 
 .object {
-  // flex-direction: row;
-  // flex-wrap: nowrap;
-  //display: inline-flex;
-  // flex-basis: content;
   width: 100px;
   flex: 1 0 auto;
 
@@ -106,7 +102,6 @@ cdk-virtual-scroll-viewport {
 }
 
 .objectName {
-  // flex-basis: content;
   width: 100px;
   flex: 1 0 auto;
 
@@ -114,7 +109,6 @@ cdk-virtual-scroll-viewport {
 }
 
 .state {
-  // flex-basis: content;
   width: 100px;
   flex: 1 0 auto;
 
@@ -124,9 +118,9 @@ cdk-virtual-scroll-viewport {
 .state-info {
   text-transform: capitalize;
   display: flex;
-  // align-items: center;
+
   &:not(:hover) {
-    color: $dark-secondary-text;
+    color: $secondary-text;
   }
 
   .state-icon {
@@ -136,8 +130,6 @@ cdk-virtual-scroll-viewport {
 }
 
 .createdBy {
-  // flex-wrap: nowrap;
-  // flex-basis: content;
   width: 100px;
   flex: 1 0 auto;
 
@@ -152,8 +144,6 @@ cdk-virtual-scroll-viewport {
 }
 
 .changeDate {
-  //flex-basis: 200px;
-  // flex-wrap: nowrap;
   width: 150px;
   flex: 1 0 auto;
 
@@ -165,6 +155,8 @@ cdk-virtual-scroll-viewport {
   justify-content: flex-end;
   width: 60px;
   flex: 1 0 auto;
+  right: 0 !important;
+  padding-right: 6px;
 
   @include hide($xs);
 }
@@ -176,7 +168,6 @@ cdk-virtual-scroll-viewport {
 
   & > * {
     margin-left: 5px;
-    // color: $dark-secondary-text;
 
     &:not(:hover) {
       color: $secondary-text;
@@ -189,6 +180,11 @@ cdk-virtual-scroll-viewport {
 
   &.cell {
     flex-flow: column;
+  }
+
+  &.cell,
+  &.header-cell {
+    padding-right: 10px;
   }
 
   .narrow-row {
@@ -222,47 +218,6 @@ cdk-virtual-scroll-viewport {
   .meta-block {
     @extend %flex-center;
 
-    // width: 200px;
     font-size: 11px;
-  }
-}
-
-.ms-Icon--WordDocument {
-  color: #2e4c81;
-}
-
-.ms-Icon--Delete {
-  @extend %fadeInHover;
-
-  &:hover {
-    color: $warn-default;
-  }
-}
-
-.table {
-  // overflow-x: auto;
-}
-
-.row {
-  min-height: 27px;
-  height: 70px;
-  cursor: pointer;
-
-  @media #{$gt-xs} {
-    // min-height: 27px;
-    height: 27px;
-  }
-
-  &:hover {
-    background-color: $app-bar;
-  }
-}
-
-.header {
-  white-space: nowrap;
-
-  & > * {
-    color: $text;
-    font-weight: 600;
   }
 }
