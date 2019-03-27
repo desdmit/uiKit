@@ -18,131 +18,26 @@
         </mat-checkbox>
       </mat-cell>
     </ng-container>
-    <ng-container matColumnDef="type">
-      <mat-header-cell *matHeaderCellDef class="type">
-        <core-table-filter (change)="filter('id', $event)">
-          <div mat-sort-header></div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="type">
-        <mat-icon fontSet="fabric" fontIcon="ms-Icon--WordDocument" [inline]="true"></mat-icon>
-      </mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="narrow">
-      <mat-header-cell *matHeaderCellDef class="narrow header-cell">
-        <core-table-filter (change)="filter('name', $event)">
-          <div mat-sort-header></div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="narrow cell">
-        <div class="narrow-row">
-          <div class="primary">{{ row.name }}</div>
-          <div class="actions-items">
-            <mat-icon fontSet="fabric" fontIcon="ms-Icon--Download" [inline]="true"></mat-icon>
-            <mat-icon fontSet="fabric" fontIcon="ms-Icon--Delete" [inline]="true"></mat-icon>
-            <mat-icon fontSet="fabric" fontIcon="ms-Icon--Info" [inline]="true"></mat-icon>
+
+    <ng-container *ngFor="let column of children" [cdkColumnDef]="column.name">
+      <mat-header-cell *cdkHeaderCellDef [ngClass]="column.name" class="header">
+        <core-table-filter (change)="filter(column.name, $event)">
+          <div mat-sort-header>
+            <ng-container [ngTemplateOutlet]="column.header"> </ng-container>
           </div>
-        </div>
-        <div class="narrow-row ">
-          <div class="secondary">{{ row.object }}:{{ row.objectName }}</div>
-          <div class="meta">{{ row.size }}</div>
-        </div>
-        <div class="narrow-row">
-          <div class="ternary">{{ row.changedBy }}</div>
-          <div class="meta-block">
-            <div class="state-info">
-              {{ row.menu.state }}<mat-icon class="state-icon" [inline]="true">menu</mat-icon>
-            </div>
-            <div class="meta">{{ row.changeDate | date: dateFormat }}</div>
-          </div>
-        </div>
+        </core-table-filter>
+      </mat-header-cell>
+      <mat-cell *cdkCellDef="let row" [ngClass]="column.name" class="cell">
+        <ng-container [ngTemplateOutlet]="column.cell" [ngTemplateOutletContext]="{ row: row }">
+        </ng-container>
       </mat-cell>
     </ng-container>
-    <ng-container matColumnDef="name">
-      <mat-header-cell *matHeaderCellDef class="name">
-        <core-table-filter (change)="filter('name', $event)">
-          <div mat-sort-header>Document Name</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="name">{{ row.name }}</mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="fileName">
-      <mat-header-cell *matHeaderCellDef class="fileName">
-        <core-table-filter (change)="filter('fileName', $event)">
-          <div mat-sort-header>File Name</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="fileName">{{ row.fileName }}</mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="object">
-      <mat-header-cell *matHeaderCellDef class="object">
-        <core-table-filter (change)="filter('object', $event)">
-          <div mat-sort-header>Related Object</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="object">{{ row.object }}</mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="objectName">
-      <mat-header-cell *matHeaderCellDef class="objectName">
-        <core-table-filter (change)="filter('objectName', $event)">
-          <div mat-sort-header>Object Name</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="objectName">{{ row.objectName }}</mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="state">
-      <mat-header-cell *matHeaderCellDef class="state">
-        <core-table-filter (change)="filter('state', $event)">
-          <div mat-sort-header>Status</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="state">
-        <div class="state-info">
-          {{ row.menu.state }}<mat-icon class="state-icon" [inline]="true">menu</mat-icon>
-        </div>
-      </mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="createdBy">
-      <mat-header-cell *matHeaderCellDef class="createdBy">
-        <core-table-filter (change)="filter('createdBy', $event)">
-          <div mat-sort-header>Created By</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="createdBy">{{ row.createdBy }}</mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="changedBy">
-      <mat-header-cell *matHeaderCellDef class="changedBy">
-        <core-table-filter (change)="filter('changedBy', $event)">
-          <div mat-sort-header>Last Modified By</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="changedBy">{{ row.changedBy }}</mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="changeDate">
-      <mat-header-cell *matHeaderCellDef class="changeDate">
-        <core-table-filter (change)="filter('changeDate', $event)">
-          <div mat-sort-header>Updated At</div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="changeDate">
-        <span>{{ row.changeDate | date: dateFormat }}</span>
-      </mat-cell>
-    </ng-container>
+
     <ng-container matColumnDef="menu" stickyEnd>
       <mat-header-cell *matHeaderCellDef class="menu">
         <core-table-menu (clear)="clearFilters()"></core-table-menu>
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="menu cell"></mat-cell>
-    </ng-container>
-    <ng-container matColumnDef="actions" stickyEnd>
-      <mat-header-cell *matHeaderCellDef class="actions"> </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="actions cell">
-        <div class="actions-items">
-          <mat-icon fontSet="fabric" fontIcon="ms-Icon--Download" [inline]="true"></mat-icon>
-          <mat-icon fontSet="fabric" fontIcon="ms-Icon--Delete" [inline]="true"></mat-icon>
-          <mat-icon fontSet="fabric" fontIcon="ms-Icon--Info" [inline]="true"></mat-icon>
-        </div>
-      </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="progress">
@@ -165,6 +60,6 @@
     >
     </mat-header-row>
 
-    <mat-row *matRowDef="let row; columns: columns" class="row"></mat-row>
+    <mat-row *matRowDef="let row; columns: columns" class="row" #rows></mat-row>
   </mat-table>
 </cdk-virtual-scroll-viewport>

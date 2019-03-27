@@ -6,15 +6,16 @@ import {
   MatSortModule,
   MatTableModule,
   MatIconModule,
-  MatIconRegistry,
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { CoreTableFilterModule } from '../filter/filter.module';
 import { CoreTableMenuModule } from '../menu/menu.module';
 import { CoreTableVirtualScrollModule } from '../virtual-scroll/virtual-scroll.module';
 import { CoreTableComponent } from './core-table.component';
+import { CoreTableColumnComponent } from './core-table-column.component';
+import { CdkTableModule } from '@angular/cdk/table';
 
-const components = [CoreTableComponent];
+const components = [CoreTableComponent, CoreTableColumnComponent];
 
 @NgModule({
   declarations: components,
@@ -28,12 +29,9 @@ const components = [CoreTableComponent];
     MatProgressBarModule,
     MatSortModule,
     MatTableModule,
+    CdkTableModule,
     ScrollingModule,
     MatIconModule,
   ],
 })
-export class CoreTableModule {
-  /*constructor(iconRegistry: MatIconRegistry) {
-    iconRegistry.registerFontClassAlias('fabric', 'ms-Icon-268');
-  }*/
-}
+export class CoreTableModule {}

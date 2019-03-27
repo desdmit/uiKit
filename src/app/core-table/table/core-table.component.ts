@@ -7,6 +7,7 @@ import {
   ViewChild,
   ViewChildren,
   QueryList,
+  ContentChildren,
 } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { exhaustMap, filter, map, tap, distinctUntilChanged } from 'rxjs/operators';
@@ -17,6 +18,7 @@ import { CoreTableDataSource } from '../data-source';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { IDocument } from '../../inventory/docoments';
 import { WindowUtilities } from '../../utilities';
+import { CoreTableColumnComponent } from './core-table-column.component';
 
 @Component({
   selector: 'core-table',
@@ -28,6 +30,7 @@ export class CoreTableComponent implements AfterViewInit, OnInit {
   @Input() public pageSize = 50;
   @Input() public sticky: boolean;
   @Output() public select = new Subject<IDocument[]>();
+  @ContentChildren(CoreTableColumnComponent) public children: QueryList<CoreTableColumnComponent>;
 
   @ViewChild(MatSort) public sort: MatSort;
   @ViewChild(MatPaginator) public paginator: MatPaginator;
@@ -40,21 +43,7 @@ export class CoreTableComponent implements AfterViewInit, OnInit {
   public offset: number;
   public rowHeight: number;
   public dataSource: CoreTableDataSource<IDocument>;
-  public columns: string[] = [
-    // 'select',
-    'type',
-    'narrow',
-    'name',
-    'fileName',
-    'object',
-    'objectName',
-    'state',
-    'createdBy',
-    'changedBy',
-    'changeDate',
-    'actions',
-    'menu',
-  ];
+  @Input() public columns: string[] = ['menu'];
 
   get indeterminate(): boolean {
     return this.dataSource.selected.length > 0 && !this.selectedAll;
