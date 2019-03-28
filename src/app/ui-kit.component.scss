@@ -11,7 +11,7 @@ button {
   margin: 2rem 2rem 0 0;
 }
 
-::ng-deep {
+:host ::ng-deep {
   .type {
     flex: 1 0 auto;
     max-width: 17px;
