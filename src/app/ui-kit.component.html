@@ -1,0 +1,111 @@
+<core-table
+  [getData]="getData"
+  [sticky]="sticky"
+  [columns]="columns"
+  matSort
+  #sort="matSort"
+  [sort]="sort"
+  (select)="changeSelect($event)"
+>
+  <ng-container matColumnDef="type">
+    <mat-header-cell *matHeaderCellDef class="type"></mat-header-cell>
+    <mat-cell *matCellDef class="type">
+      <mat-icon class="type-icon" fontSet="fabric" fontIcon="ms-Icon--WordDocument" [inline]="true">
+      </mat-icon>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="name">Document Name</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="name">{{ element.name }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="fileName">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="fileName">File Name</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="fileName">{{ element.fileName }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="object">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="object">
+      Related Object
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="object">{{ element.object }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="objectName">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="objectName">
+      Object Name
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="objectName">{{ element.objectName }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="state">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="state">Status</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="state">
+      <div class="state-info">
+        {{ element.menu.state }}<mat-icon class="state-icon" [inline]="true">menu</mat-icon>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="createdBy">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="createdBy">
+      Created By
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="createdBy">{{ element.createdBy }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="changedBy">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="changedBy">
+      Last Modified By
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="changedBy">{{ element.changedBy }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="changeDate">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="changeDate">
+      Updated Atw
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" class="changeDate">
+      {{ element.changeDate | date: dateFormat }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef mat-sort-header class="actions"></mat-header-cell>
+    <mat-cell *matCellDef="let element" class="actions">
+      <div class="actions-items">
+        <mat-icon fontSet="fabric" fontIcon="ms-Icon&#45;&#45;Download" [inline]="true"></mat-icon>
+        <mat-icon fontSet="fabric" fontIcon="ms-Icon&#45;&#45;Delete" [inline]="true"></mat-icon>
+        <mat-icon fontSet="fabric" fontIcon="ms-Icon&#45;&#45;Info" [inline]="true"></mat-icon>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="narrow">
+    <mat-header-cell *matHeaderCellDef class="narrow"></mat-header-cell>
+    <mat-cell *matCellDef="let element" class="narrow">
+      <div class="narrow-row">
+        <div class="primary">{{ element.name }}</div>
+        <div class="actions-items">
+          <mat-icon fontSet="fabric" fontIcon="ms-Icon--Download" [inline]="true"></mat-icon>
+          <mat-icon fontSet="fabric" fontIcon="ms-Icon--Delete" [inline]="true"></mat-icon>
+          <mat-icon fontSet="fabric" fontIcon="ms-Icon--Info" [inline]="true"></mat-icon>
+        </div>
+      </div>
+      <div class="narrow-row ">
+        <div class="secondary">{{ element.object }}:{{ element.objectName }}</div>
+        <div class="meta">{{ element.size }}</div>
+      </div>
+      <div class="narrow-row">
+        <div class="ternary">{{ element.changedBy }}</div>
+        <div class="meta-block">
+          <div class="state-info">
+            {{ element.menu.state }}<mat-icon class="state-icon" [inline]="true">menu</mat-icon>
+          </div>
+          <div class="meta">{{ element.changeDate | date: dateFormat }}</div>
+        </div>
+      </div>
+    </mat-cell>
+  </ng-container>
+</core-table>

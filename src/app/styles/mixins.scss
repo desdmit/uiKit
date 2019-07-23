@@ -1,0 +1,7 @@
+@mixin hide($queries...) {
+  @each $query in $queries {
+    @media #{$query} {
+      display: none !important;
+    }
+  }
+}

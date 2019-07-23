@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
-import {
-  MatButtonModule,
-  MatIconModule,
-  MatMenuModule,
-} from '@angular/material';
+import { MatButtonModule, MatIconModule, MatMenuModule } from '@angular/material';
 import { CoreTableMenuComponent } from './menu.component';
 
 const components = [CoreTableMenuComponent];

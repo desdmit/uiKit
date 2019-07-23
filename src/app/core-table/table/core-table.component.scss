@@ -1,0 +1,76 @@
+@import '../../styles/index';
+
+:host {
+  display: block;
+  height: 100%;
+
+  &::ng-deep .cdk-virtual-scroll-content-wrapper {
+    /* cdkVirtualScrollViewport uses translateY to correct for all elements that are removed. */
+    /* plcaholder row is used instead because the translate causes problems with the sticky header */
+    /* so transform has been switched off via styles here*/
+    transform: translateY(0px) !important;
+  }
+}
+
+.viewport {
+  height: 100%;
+}
+
+.table {
+  width: 100%;
+}
+
+.content-header-row,
+.content-row {
+  min-height: 27px;
+}
+
+.content-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: $app-bar;
+  }
+}
+
+.offset-row {
+  min-height: 0;
+}
+
+.select {
+  padding-right: 13px;
+  padding-left: 13px;
+  flex: 1 0 auto;
+  width: 17px;
+  max-width: 17px;
+  overflow: initial;
+}
+
+.progress {
+  border: none;
+  min-height: 0;
+
+  .mat-header-cell {
+    border: 0;
+    padding: 0;
+  }
+}
+
+.progress-bar {
+  bottom: 0;
+  position: absolute;
+  @extend %fadeIn;
+}
+
+.menu {
+  width: 40px;
+  max-width: 40px;
+  flex: 1 0 auto;
+  margin-right: -40px;
+  padding-right: 0;
+
+  &.cell {
+    z-index: -1 !important;
+    background: transparent;
+  }
+}

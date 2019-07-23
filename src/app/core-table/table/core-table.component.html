@@ -1,0 +1,55 @@
+<cdk-virtual-scroll-viewport coreTableVirtualScroll [getRowHeight]="getRowHeight" class="viewport">
+  <mat-table [dataSource]="dataSource" [trackBy]="id" class="table">
+    <ng-content></ng-content>
+
+    <ng-container matColumnDef="select">
+      <mat-header-cell *matHeaderCellDef class="select">
+        <mat-checkbox
+          (change)="$event ? masterToggle() : null"
+          [checked]="selection.hasValue() && isAllSelected()"
+          [indeterminate]="selection.hasValue() && !isAllSelected()"
+        >
+        </mat-checkbox>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="select">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="changeSelection($event, row)"
+          [checked]="selection.isSelected(row)"
+        >
+        </mat-checkbox>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="menu" stickyEnd>
+      <mat-header-cell *matHeaderCellDef class="menu">
+        <core-table-menu (clear)="clearFilters()"></core-table-menu>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="menu cell"></mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="progress">
+      <mat-header-cell *matHeaderCellDef [attr.colspan]="columnsToDisplay.length">
+        <mat-progress-bar mode="indeterminate" class="progress-bar" *ngIf="pending">
+        </mat-progress-bar>
+      </mat-header-cell>
+    </ng-container>
+
+    <mat-header-row
+      *matHeaderRowDef="columnsToDisplay; sticky: sticky"
+      class="content-header-row"
+      #headerRow
+    ></mat-header-row>
+    <mat-header-row class="progress" *matHeaderRowDef="['progress']; sticky: sticky">
+    </mat-header-row>
+
+    <!-- cdkVirtualScrollViewport uses translateY to correct for all elements that are removed. -->
+    <!-- plcaholder row is used instead because the translate causes problems with the sticky header -->
+    <mat-row
+      class="offset-row"
+      [style.height.px]="offset"
+      *matRowDef="let row; let index = index; columns: []; when: offsetRowWhen"
+    ></mat-row>
+    <mat-row *matRowDef="let row; columns: columnsToDisplay" class="content-row" #row></mat-row>
+  </mat-table>
+</cdk-virtual-scroll-viewport>

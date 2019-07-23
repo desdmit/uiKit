@@ -18,14 +18,14 @@ import { filter, map } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CoreTableFilterComponent implements AfterViewInit {
-  @Output() change: Observable<(text: string) => boolean>;
+  @Output() public change: Observable<(text: string) => boolean>;
 
-  @ViewChild(MatInput) input: MatInput;
-  @ViewChild(MatMenuTrigger) menu: MatMenuTrigger;
+  @ViewChild(MatInput) public input: MatInput;
+  @ViewChild(MatMenuTrigger) public menu: MatMenuTrigger;
 
-  filter = new FormControl();
-  operation = new FormControl();
-  operations: any[];
+  public filter = new FormControl();
+  public operation = new FormControl();
+  public operations: any[];
 
   @HostBinding('class.has-value')
   get hasValue(): boolean {
@@ -45,20 +45,17 @@ export class CoreTableFilterComponent implements AfterViewInit {
     this.operations = operations;
     this.operation.setValue(operations[0]);
 
-    this.change = merge(
-      this.filter.valueChanges,
-      this.operation.valueChanges
-    ).pipe(
-      filter(value => value != null),
+    this.change = merge(this.filter.valueChanges, this.operation.valueChanges).pipe(
+      filter(value => value),
       map(() => ({
         fn: this.operation.value.predicate,
         b: simplify(this.filter.value),
       })),
-      map(({ fn, b }) => (text: string) => fn(simplify(text), b))
+      map(({ fn, b }) => (text: string) => fn(simplify(text), b)),
     );
   }
 
-  ngAfterViewInit() {
+  public ngAfterViewInit() {
     this.menu.menuOpened.subscribe(() => this.input && this.input.focus());
   }
 }
@@ -70,41 +67,35 @@ const endsWith = (a: string, b: string): boolean => a.endsWith(b);
 const empty = (a: string): boolean => !a;
 const notEmpty = (a: string): boolean => !!a;
 
-const fnArgumentCount = (fn: Function): number =>
+const operationsFn = [contains, equals, startsWith, endsWith, empty, notEmpty];
+
+const fnArgumentCount = (fn: (a: string, b: string) => boolean): number =>
   fn
     .toString()
     .replace(/\((.*?)\) *?=>.*/, '$1') // for lambdas
     .replace(/function.*?\((.*?)\).*/, '$1') // for functions
     .split(',').length;
 
-const operations = [
-  contains,
-  equals,
-  startsWith,
-  endsWith,
-  empty,
-  notEmpty,
-].map(predicate => ({
+const operations = operationsFn.map(predicate => ({
   predicate,
   name: predicate.name,
-  text: textify(predicate.name),
+  text: makeReadable(predicate.name),
   needsFilter: fnArgumentCount(predicate) === 2,
 }));
-
 
 /**
  * Simplifies a string (trims and lowerCases)
  */
-function simplify(s: string): string {
-  return `${s}`.trim().toLowerCase();
+function simplify(value: string): string {
+  return `${value}`.trim().toLowerCase();
 }
 
 /**
  * Transforms a camelCase string into a readable text format
- * @example textify('helloWorld!')
+ * @example makeReadable('helloWorld!')
  * // Hello world!
  */
-function textify(text: string) {
+function makeReadable(text: string) {
   return text
     .replace(/([A-Z])/g, char => ` ${char.toLowerCase()}`)
     .replace(/^([a-z])/, char => char.toUpperCase());

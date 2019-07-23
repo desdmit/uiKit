@@ -1,0 +1,9 @@
+.ms-Icon--WordDocument {
+  color: #2e4c81;
+}
+
+.ms-Icon--Delete {
+  &:hover {
+    color: $warn-default;
+  }
+}

@@ -3,7 +3,17 @@
 }
 
 %fadeIn {
-  animation: fadeIn 0.15s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+%fadeInShow {
+  opacity: 0;
+
+  transition: opacity 0.3s ease-in-out;
+
+  &.show {
+    opacity: 1;
+  }
 }
 
 %fadeInHover {
@@ -30,5 +40,14 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    height: 0;
+  }
+  to {
+    height: initial;
   }
 }

@@ -5,12 +5,11 @@ import {
   Directive,
   forwardRef,
   Input,
-  OnChanges,
   OnDestroy,
 } from '@angular/core';
 import { MatTable } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { CoreTableDataSource } from '../data-source';
+import { CoreTableDataSource } from '../data-source/data-source';
 import { CoreTableVirtualScrollStrategy } from './virtual-scroll.strategy';
 
 @Directive({
@@ -23,15 +22,21 @@ import { CoreTableVirtualScrollStrategy } from './virtual-scroll.strategy';
     },
   ],
 })
-export class CoreTableFixedVirtualScrollDirective implements AfterViewInit, OnChanges, OnDestroy {
-  @Input() public rowHeight = 48;
-  @Input() public offset = 57;
+export class CoreTableFixedVirtualScrollDirective implements AfterViewInit, OnDestroy {
+  @Input() public getRowHeight: () => number;
+  @Input() public getHeaderOffset: () => number;
 
   @ContentChild(MatTable) public table: MatTable<any>;
+
+  private defaultRowHeight = 27;
+  private defaultOffset = 0;
 
   public scrollStrategy: CoreTableVirtualScrollStrategy;
 
   private sub: Subscription;
+
+  private rowHeight = () => (this.getRowHeight && this.getRowHeight()) || this.defaultRowHeight;
+  private offset = () => (this.getHeaderOffset && this.getHeaderOffset()) || this.defaultOffset;
 
   constructor() {
     this.scrollStrategy = new CoreTableVirtualScrollStrategy(this.rowHeight, this.offset);
@@ -43,10 +48,6 @@ export class CoreTableFixedVirtualScrollDirective implements AfterViewInit, OnCh
         this.scrollStrategy.setDataLength(data.length);
       });
     }
-  }
-
-  public ngOnChanges() {
-    this.scrollStrategy.setScrollHeight(this.rowHeight, this.offset);
   }
 
   public ngOnDestroy() {
