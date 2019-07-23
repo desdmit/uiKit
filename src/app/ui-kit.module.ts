@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { MatIconModule, MatIconRegistry, MatTableModule } from '@angular/material';
+import { MatIconModule, MatIconRegistry, MatSortModule, MatTableModule } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { UiKitComponent } from './ui-kit.component';
@@ -15,6 +15,7 @@ import { CoreTableFilterModule } from './core-table/filter/filter.module';
     MatIconModule,
     CoreTableFilterModule,
     MatTableModule,
+    MatSortModule,
   ],
   exports: [MatIconModule],
   declarations: [UiKitComponent],

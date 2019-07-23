@@ -1,161 +1,160 @@
 import {
   Component,
   Input,
-  AfterViewInit,
   OnInit,
   Output,
   ViewChild,
   ViewChildren,
   QueryList,
   ContentChildren,
+  AfterContentInit,
+  ViewContainerRef,
+  ChangeDetectorRef,
+  EventEmitter,
+  OnDestroy,
 } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
-import { exhaustMap, filter, map, tap, distinctUntilChanged } from 'rxjs/operators';
-import { MatPaginator, MatSort } from '@angular/material';
-import { CoreTableMenuComponent } from '../menu/menu.component';
+import {
+  exhaustMap,
+  filter,
+  map,
+  tap,
+  distinctUntilChanged,
+  startWith,
+  takeUntil,
+  debounceTime,
+} from 'rxjs/operators';
+import { MatColumnDef, MatSort, MatTable } from '@angular/material';
 import { CoreTableFilterComponent } from '../filter/filter.component';
 import { CoreTableDataSource } from '../data-source';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { IDocument } from '../../inventory/docoments';
-import { WindowUtilities } from '../../utilities';
-import { CoreTableColumnComponent } from './core-table-column.component';
+import { mean } from 'lodash';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'core-table',
   templateUrl: './core-table.component.html',
   styleUrls: ['./core-table.component.scss'],
 })
-export class CoreTableComponent implements AfterViewInit, OnInit {
-  @Input() public getData: (page: number, count: number) => Observable<IDocument[]>;
+export class CoreTableComponent<T> implements OnInit, AfterContentInit, OnDestroy {
+  @Input() public getData: (page: number, count: number) => Observable<T[]>;
   @Input() public pageSize = 50;
+  @Input() public buffer = 5;
   @Input() public sticky: boolean;
-  @Output() public select = new Subject<IDocument[]>();
-  @ContentChildren(CoreTableColumnComponent) public children: QueryList<CoreTableColumnComponent>;
+  @Input() public columns: string[];
+  @Input() public multiSelect = true;
+  @Output() public select = new EventEmitter<T[]>();
 
-  @ViewChild(MatSort) public sort: MatSort;
-  @ViewChild(MatPaginator) public paginator: MatPaginator;
+  @ViewChild(MatTable) private table: MatTable<T>;
+  @ContentChildren(MatColumnDef) private columnsDef: QueryList<MatColumnDef>;
+
+  @Input() public sort: MatSort;
   @ViewChild(CdkVirtualScrollViewport) public viewport: CdkVirtualScrollViewport;
-  @ViewChild(CoreTableMenuComponent) public tableMenu: CoreTableMenuComponent;
   @ViewChildren(CoreTableFilterComponent) public filters: QueryList<CoreTableFilterComponent>;
 
-  public dateFormat = 'MM/dd/yyyy, hh:mm a';
+  @ViewChildren('row', { read: ViewContainerRef }) private rowsRef: QueryList<ViewContainerRef>;
+  @ViewChild('headerRow', { read: ViewContainerRef }) private headerRowRef: ViewContainerRef;
+
+  public columnsToDisplay: string[] = [];
   public pending: boolean;
   public offset: number;
-  public rowHeight: number;
-  public dataSource: CoreTableDataSource<IDocument>;
-  @Input() public columns: string[] = ['menu'];
+  public dataSource: CoreTableDataSource<T>;
+  public selection: SelectionModel<T>;
+  private ngUnsubscribe: Subject<any> = new Subject();
 
-  get indeterminate(): boolean {
-    return this.dataSource.selected.length > 0 && !this.selectedAll;
-  }
-
-  get length(): number {
-    return this.dataSource.data.length;
-  }
-
-  get selectedAll(): boolean {
-    return this.dataSource.selectedAll;
-  }
-
-  public constructor(windowUtils: WindowUtilities) {
-    windowUtils.size
-      .pipe(
-        map(({ isNarrow }) => isNarrow),
-        distinctUntilChanged(),
-      )
-      .subscribe(isNarrow => {
-        this.rowHeight = isNarrow ? 70 : 27;
-      });
-  }
+  constructor(private cd: ChangeDetectorRef) {}
 
   public ngOnInit() {
-    this.viewport.scrolledIndexChange.subscribe(() => {
-      this.offset = -this.viewport.getOffsetToRenderedContentStart();
-    });
-
     if (this.dataSource) {
       return;
     }
 
-    if (this.hasObservers(this.select)) {
-      this.columns = ['select', ...this.columns];
-    }
+    this.initColumns();
 
-    this.dataSource = new CoreTableDataSource([], {
+    this.dataSource = new CoreTableDataSource([{}], {
       sort: this.sort,
-      paginator: this.paginator,
       viewport: this.viewport,
     });
 
-    this.dataSource.selectionChanged.subscribe(() => this.select.next(this.dataSource.selected));
+    this.selection = new SelectionModel<T>(this.multiSelect);
+    this.selection.changed
+      .pipe(
+        debounceTime(100),
+        map(() => this.selection.selected),
+        takeUntil(this.ngUnsubscribe),
+      )
+      .subscribe(this.select);
 
-    this.getData(0, this.pageSize).subscribe(data => {
-      this.dataSource.allData = data;
-    });
+    this.viewport.scrolledIndexChange
+      .pipe(
+        map(() => this.viewport.getOffsetToRenderedContentStart()),
+        distinctUntilChanged(),
+      )
+      .subscribe(val => (this.offset = val));
 
-    const buffer = 5;
     this.viewport.renderedRangeStream
       .pipe(
-        map(({ end }) => {
-          return { end, data: this.dataSource.allData };
-        }),
-        filter(({ end, data }) => end + buffer > data.length),
+        startWith({ end: 0 }),
+        map(({ end }) => ({ end, data: this.dataSource.data })),
+        filter<{ end: number; data: T[] }>(({ end, data }) => end + this.buffer > data.length),
         tap(() => (this.pending = true)),
         exhaustMap(({ data }) => {
-          return this.getData(data.length / this.pageSize, this.pageSize).pipe(
+          return this.getData((data.length - 1) / this.pageSize, this.pageSize).pipe(
             map(value => [...data, ...value]),
           );
         }),
       )
       .subscribe(data => {
-        this.dataSource.allData = data;
+        this.dataSource.data = data;
         this.pending = false;
       });
   }
 
-  public ngAfterViewInit() {
-    if (this.filters.length && !this.tableMenu) {
-      // this just hides the table data by introducing a bogus filter.
-      // not having a clear filters button hopefully makes the error obvious.
-      this.dataSource.setFilter({ key: '', predicate: () => undefined, valueFn: () => undefined });
-      // this notifies the error
-      throw new Error(
-        `<core-table-filter> usage requires a <core-table-menu> for user convenience`,
-      );
-    }
+  public ngAfterContentInit() {
+    this.columnsDef.forEach(columnDef => this.table.addColumnDef(columnDef));
   }
 
-  private hasObservers(subject: Subject<any>): boolean {
-    return subject.observers.length > 0;
+  public ngOnDestroy() {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+  }
+
+  public getRowHeight = () =>
+    mean(this.rowsRef && this.rowsRef.map(({ element }) => element.nativeElement.offsetHeight));
+
+  public offsetRowWhen = (index: number) => index === 0;
+
+  private initColumns() {
+    const columns = [...this.columns, 'menu'];
+
+    if (this.hasObservers(this.select)) {
+      columns.unshift('select');
+    }
+
+    this.columnsToDisplay = columns;
+  }
+
+  private hasObservers = (subject: Subject<any>): boolean => subject.observers.length > 0;
+
+  public isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  public masterToggle() {
+    this.isAllSelected()
+      ? this.selection.clear()
+      : this.dataSource.data.forEach(row => this.selection.select(row));
+  }
+
+  public changeSelection(event, item: T) {
+    this.selection.toggle(item);
+    this.cd.detectChanges();
   }
 
   public clearFilters(): void {
     this.dataSource.clearFilters();
     this.filters.forEach(fc => fc.filter.setValue(undefined));
-  }
-
-  public clearSelection(): void {
-    this.dataSource.clearSelection();
-  }
-
-  public filter(
-    key: string,
-    predicate: (value: any) => boolean,
-    valueFn: (item: IDocument) => any,
-  ): void {
-    const tableFilter = { key, predicate, valueFn };
-    this.dataSource.setFilter(tableFilter);
-  }
-
-  public isSelected(item: IDocument): boolean {
-    return this.dataSource.isSelected(item);
-  }
-
-  public toggle(item: IDocument): void {
-    this.dataSource.toggle(item);
-  }
-
-  public toggleAll(): void {
-    this.dataSource.toggleAll();
   }
 }

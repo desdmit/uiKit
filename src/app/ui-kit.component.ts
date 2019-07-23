@@ -9,6 +9,8 @@ import { getData } from './inventory/docoments';
   styleUrls: ['./ui-kit.component.scss'],
 })
 export class UiKitComponent {
+  public dateFormat = 'MM/dd/yyyy, hh:mm a';
+
   public delay = 2000;
   public getData = (page: number, size: number) => of(getData(page, size)).pipe(delay(this.delay));
   public sticky = true;
@@ -24,6 +26,9 @@ export class UiKitComponent {
     'changedBy',
     'changeDate',
     'actions',
-    'menu',
   ];
+
+  public changeSelect(items) {
+    window.console.log('selection: ', items);
+  }
 }

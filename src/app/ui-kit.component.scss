@@ -11,155 +11,172 @@ button {
   margin: 2rem 2rem 0 0;
 }
 
-:host ::ng-deep {
-  .type {
-    flex: 1 0 auto;
-    max-width: 17px;
+.mat-header-cell {
+  white-space: nowrap;
 
-    .type-icon {
-      font-size: 17px !important;
-    }
+  color: $text;
+  font-weight: 600;
+}
+
+.mat-header-cell,
+.mat-cell {
+  padding-right: 16px;
+
+  &:first-of-type {
+    padding-left: 10px;
+  }
+}
+
+.type {
+  flex: 1 0 auto;
+  width: 17px;
+  max-width: 17px;
+
+  .type-icon {
+    font-size: 17px !important;
+  }
+}
+
+.name {
+  width: 200px;
+  flex: 1 0 auto;
+
+  @include hide($xs);
+}
+
+.fileName {
+  width: 200px;
+  flex: 1 0 auto;
+
+  @include hide($xs);
+}
+
+.object {
+  width: 100px;
+  flex: 1 0 auto;
+
+  @include hide($xs);
+}
+
+.objectName {
+  width: 100px;
+  flex: 1 0 auto;
+
+  @include hide($xs);
+}
+
+.state {
+  width: 100px;
+  flex: 1 0 auto;
+
+  @include hide($xs);
+}
+
+.state-info {
+  @extend %flex-center;
+  text-transform: capitalize;
+
+  &:not(:hover) {
+    color: $secondary-text;
   }
 
-  .name {
-    width: 200px;
-    flex: 1 0 auto;
-
-    @include hide($xs);
+  .state-icon {
+    margin-left: 5px;
+    font-size: 1.4em;
   }
+}
 
-  .fileName {
-    width: 200px;
-    flex: 1 0 auto;
+.createdBy {
+  width: 100px;
+  flex: 1 0 auto;
 
-    @include hide($xs);
-  }
+  @include hide($xs);
+}
 
-  .object {
-    width: 100px;
-    flex: 1 0 auto;
+.changedBy {
+  width: 100px;
+  flex: 1 0 auto;
 
-    @include hide($xs);
-  }
+  @include hide($xs);
+}
 
-  .objectName {
-    width: 100px;
-    flex: 1 0 auto;
+.changeDate {
+  width: 150px;
+  flex: 1 0 auto;
 
-    @include hide($xs);
-  }
+  @include hide($xs);
+}
 
-  .state {
-    width: 100px;
-    flex: 1 0 auto;
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 60px;
+  flex: 1 0 auto;
+  right: 0 !important;
+  padding-right: 6px;
 
-    @include hide($xs);
-  }
+  @include hide($xs);
+}
 
-  .state-info {
-    @extend %flex-center;
-    text-transform: capitalize;
+.actions-items {
+  @extend %flex-center;
+
+  font-size: 15px;
+
+  & > * {
+    margin-left: 5px;
 
     &:not(:hover) {
       color: $secondary-text;
     }
+  }
+}
 
-    .state-icon {
-      margin-left: 5px;
-      font-size: 1.4em;
-    }
+.narrow {
+  @include hide($gt-xs);
+
+  &.mat-cell {
+    flex-flow: column;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
-  .createdBy {
-    width: 100px;
-    flex: 1 0 auto;
-
-    @include hide($xs);
+  &.mat-cell,
+  &.mat-header-cell {
+    padding-right: 10px;
   }
 
-  .changedBy {
-    width: 100px;
-    flex: 1 0 auto;
-
-    @include hide($xs);
-  }
-
-  .changeDate {
-    width: 150px;
-    flex: 1 0 auto;
-
-    @include hide($xs);
-  }
-
-  .actions {
-    display: flex;
-    justify-content: flex-end;
-    width: 60px;
-    flex: 1 0 auto;
-    right: 0 !important;
-    padding-right: 6px;
-
-    @include hide($xs);
-  }
-
-  .actions-items {
+  .narrow-row {
     @extend %flex-center;
 
-    font-size: 15px;
-
-    & > * {
-      margin-left: 5px;
-
-      &:not(:hover) {
-        color: $secondary-text;
-      }
-    }
+    flex-wrap: nowrap;
+    width: 100%;
+    padding: 1px 0;
   }
 
-  .narrow {
-    @include hide($gt-xs);
+  .primary {
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+  }
 
-    &.cell {
-      flex-flow: column;
-    }
+  .secondary {
+    font-size: 12px;
+  }
 
-    &.cell,
-    &.header-cell {
-      padding-right: 10px;
-    }
+  .ternary {
+    font-size: 12px;
+    color: $secondary-text;
+  }
 
-    .narrow-row {
-      @extend %flex-center;
+  .meta {
+    font-size: 11px;
+    margin-left: 30px;
+  }
 
-      flex-wrap: nowrap;
-      width: 100%;
-      padding: 1px 0;
-    }
+  .meta-block {
+    @extend %flex-center;
 
-    .primary {
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-    }
-
-    .secondary {
-      font-size: 12px;
-    }
-
-    .ternary {
-      font-size: 12px;
-      color: $secondary-text;
-    }
-
-    .meta {
-      font-size: 11px;
-      margin-left: 30px;
-    }
-
-    .meta-block {
-      @extend %flex-center;
-
-      font-size: 11px;
-    }
+    font-size: 11px;
   }
 }

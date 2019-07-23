@@ -3,6 +3,13 @@
 :host {
   display: block;
   height: 100%;
+
+  &::ng-deep .cdk-virtual-scroll-content-wrapper {
+    /* cdkVirtualScrollViewport uses translateY to correct for all elements that are removed. */
+    /* plcaholder row is used instead because the translate causes problems with the sticky header */
+    /* so transform has been switched off via styles here*/
+    transform: translateY(0px) !important;
+  }
 }
 
 .viewport {
@@ -13,36 +20,30 @@
   width: 100%;
 }
 
-.row {
+.content-header-row,
+.content-row {
   min-height: 27px;
-  height: 70px;
-  cursor: pointer;
+}
 
-  @media #{$gt-xs} {
-    height: 27px;
-  }
+.content-row {
+  cursor: pointer;
 
   &:hover {
     background-color: $app-bar;
   }
 }
 
-.header {
-  white-space: nowrap;
-
-  & > * {
-    color: $text;
-    font-weight: 600;
-  }
+.offset-row {
+  min-height: 0;
 }
 
-.mat-header-cell,
-.mat-cell {
-  padding-right: 16px;
-
-  &:first-of-type {
-    padding-left: 10px;
-  }
+.select {
+  padding-right: 13px;
+  padding-left: 13px;
+  flex: 1 0 auto;
+  width: 17px;
+  max-width: 17px;
+  overflow: initial;
 }
 
 .progress {

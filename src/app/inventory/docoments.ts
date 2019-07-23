@@ -26,7 +26,7 @@ export interface IDocument {
 
 function getData(startId: number, size = 20): IDocument[] {
   const result: IDocument[] = [];
-  for (let i = startId; i < size + startId; i++) {
+  for (let i = startId * size; i < startId * size + size; i++) {
     result.push({
       id: i,
       type: 'word',

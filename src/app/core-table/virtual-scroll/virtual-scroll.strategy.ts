@@ -1,5 +1,6 @@
 import { CdkVirtualScrollViewport, VirtualScrollStrategy } from '@angular/cdk/scrolling';
-import { Observable, Subject } from 'rxjs';
+import { fromEvent, Observable, Subject, Subscription } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 
 export class CoreTableVirtualScrollStrategy implements VirtualScrollStrategy {
   public scrolledIndexChange: Observable<number>;
@@ -8,9 +9,23 @@ export class CoreTableVirtualScrollStrategy implements VirtualScrollStrategy {
   private readonly indexChange = new Subject<number>();
   private viewport: CdkVirtualScrollViewport;
   private offset = 0;
+  private prevOffset = 0;
+  private prevRowHeight;
+  private resizeSub: Subscription;
 
-  constructor(private itemHeight: number, private headerOffset: number, private buffer = 15) {
+  constructor(
+    private getRowHeight: () => number,
+    private getHeaderOffset?: () => number,
+    private buffer = 15,
+  ) {
     this.scrolledIndexChange = this.indexChange.asObservable();
+
+    this.resizeSub = fromEvent(window, 'resize')
+      .pipe(startWith(undefined))
+      .subscribe(() => {
+        this.onDataLengthChanged();
+        this.updateContent();
+      });
   }
 
   public attach(viewport: CdkVirtualScrollViewport): void {
@@ -28,7 +43,8 @@ export class CoreTableVirtualScrollStrategy implements VirtualScrollStrategy {
       return;
     }
 
-    this.viewport.setTotalContentSize(this.dataLength * this.itemHeight + this.headerOffset);
+    const contentSize = this.dataLength * this.getRowHeight() + this.getHeaderOffset();
+    this.viewport.setTotalContentSize(contentSize);
   }
 
   public setDataLength(length: number): void {
@@ -37,25 +53,9 @@ export class CoreTableVirtualScrollStrategy implements VirtualScrollStrategy {
     this.updateContent();
   }
 
-  public setScrollHeight(rowHeight: number, headerOffset: number) {
-    const oldRowHeight = this.itemHeight;
-
-    this.itemHeight = rowHeight;
-    this.headerOffset = headerOffset;
-
-    if (this.viewport) {
-      const offset = this.viewport.measureScrollOffset();
-      const skip = offset / oldRowHeight;
-
-      this.onDataLengthChanged();
-      this.updateContent();
-
-      setTimeout(() => this.scrollToIndex(skip));
-    }
-  }
-
   public detach(): void {
-    // add some unsubscribe actions here if required in the future
+    this.resizeSub.unsubscribe();
+    this.indexChange.complete();
   }
 
   public onContentRendered(): void {
@@ -67,7 +67,15 @@ export class CoreTableVirtualScrollStrategy implements VirtualScrollStrategy {
   }
 
   public scrollToIndex(index: number, behavior?: ScrollBehavior): void {
-    this.viewport.scrollToOffset(index * this.itemHeight, behavior);
+    this.viewport.scrollToOffset(index * this.getRowHeight(), behavior);
+  }
+
+  private scrollToNewPosition(offset: number, rowHeight: number) {
+    const skip = offset / rowHeight;
+
+    this.onDataLengthChanged();
+    this.scrollToIndex(skip);
+    setTimeout(() => this.scrollToIndex(skip));
   }
 
   private updateContent(): void {
@@ -75,18 +83,27 @@ export class CoreTableVirtualScrollStrategy implements VirtualScrollStrategy {
       return;
     }
 
+    const itemHeight = this.getRowHeight();
+
+    if (this.prevRowHeight !== itemHeight) {
+      this.scrollToNewPosition(this.prevOffset, this.prevRowHeight);
+    }
+
+    this.prevRowHeight = itemHeight;
+    this.prevOffset = this.offset;
     this.offset = this.viewport.measureScrollOffset();
 
     const viewportSize = this.viewport.getViewportSize();
-    const amount = Math.ceil(viewportSize / this.itemHeight);
-    const skip = Math.round(this.offset / this.itemHeight);
+    const amount = Math.ceil(viewportSize / itemHeight);
+    const skip = Math.round(this.offset / itemHeight);
     const index = Math.max(0, skip);
     const start = Math.max(0, index - this.buffer);
     const end = Math.min(this.dataLength, index + amount + this.buffer);
-    const contentOffset = this.itemHeight * start;
+    const contentOffset = itemHeight * start;
+
+    this.indexChange.next(index);
 
     this.viewport.setRenderedRange({ start, end });
     this.viewport.setRenderedContentOffset(contentOffset);
-    this.indexChange.next(index);
   }
 }

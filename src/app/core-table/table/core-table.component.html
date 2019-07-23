@@ -1,35 +1,23 @@
-<cdk-virtual-scroll-viewport coreTableVirtualScroll [rowHeight]="rowHeight" class="viewport">
-  <mat-table matSort [dataSource]="dataSource" [trackBy]="id" class="table">
+<cdk-virtual-scroll-viewport coreTableVirtualScroll [getRowHeight]="getRowHeight" class="viewport">
+  <mat-table [dataSource]="dataSource" [trackBy]="id" class="table">
+    <ng-content></ng-content>
+
     <ng-container matColumnDef="select">
-      <mat-header-cell *matHeaderCellDef>
+      <mat-header-cell *matHeaderCellDef class="select">
         <mat-checkbox
-          (change)="$event && toggleAll()"
-          [checked]="selectedAll"
-          [indeterminate]="indeterminate"
+          (change)="$event ? masterToggle() : null"
+          [checked]="selection.hasValue() && isAllSelected()"
+          [indeterminate]="selection.hasValue() && !isAllSelected()"
         >
         </mat-checkbox>
       </mat-header-cell>
-      <mat-cell *matCellDef="let row">
+      <mat-cell *matCellDef="let row" class="select">
         <mat-checkbox
           (click)="$event.stopPropagation()"
-          (change)="$event && toggle(row)"
-          [checked]="isSelected(row)"
+          (change)="changeSelection($event, row)"
+          [checked]="selection.isSelected(row)"
         >
         </mat-checkbox>
-      </mat-cell>
-    </ng-container>
-
-    <ng-container *ngFor="let column of children" [cdkColumnDef]="column.name">
-      <mat-header-cell *cdkHeaderCellDef [ngClass]="column.name" class="header">
-        <core-table-filter (change)="filter(column.name, $event)">
-          <div mat-sort-header>
-            <ng-container [ngTemplateOutlet]="column.header"> </ng-container>
-          </div>
-        </core-table-filter>
-      </mat-header-cell>
-      <mat-cell *cdkCellDef="let row" [ngClass]="column.name" class="cell">
-        <ng-container [ngTemplateOutlet]="column.cell" [ngTemplateOutletContext]="{ row: row }">
-        </ng-container>
       </mat-cell>
     </ng-container>
 
@@ -41,25 +29,27 @@
     </ng-container>
 
     <ng-container matColumnDef="progress">
-      <mat-header-cell *matHeaderCellDef [attr.colspan]="columns.length">
-        <mat-progress-bar mode="indeterminate" *ngIf="pending" class="progress-bar">
+      <mat-header-cell *matHeaderCellDef [attr.colspan]="columnsToDisplay.length">
+        <mat-progress-bar mode="indeterminate" class="progress-bar" *ngIf="pending">
         </mat-progress-bar>
       </mat-header-cell>
     </ng-container>
 
     <mat-header-row
-      *matHeaderRowDef="columns; sticky: sticky"
-      [style.top.px]="offset"
-      class="header"
-    >
-    </mat-header-row>
-    <mat-header-row
-      class="progress"
-      *matHeaderRowDef="['progress']; sticky: sticky"
-      [style.top.px]="offset + 56"
-    >
+      *matHeaderRowDef="columnsToDisplay; sticky: sticky"
+      class="content-header-row"
+      #headerRow
+    ></mat-header-row>
+    <mat-header-row class="progress" *matHeaderRowDef="['progress']; sticky: sticky">
     </mat-header-row>
 
-    <mat-row *matRowDef="let row; columns: columns" class="row" #rows></mat-row>
+    <!-- cdkVirtualScrollViewport uses translateY to correct for all elements that are removed. -->
+    <!-- plcaholder row is used instead because the translate causes problems with the sticky header -->
+    <mat-row
+      class="offset-row"
+      [style.height.px]="offset"
+      *matRowDef="let row; let index = index; columns: []; when: offsetRowWhen"
+    ></mat-row>
+    <mat-row *matRowDef="let row; columns: columnsToDisplay" class="content-row" #row></mat-row>
   </mat-table>
 </cdk-virtual-scroll-viewport>
